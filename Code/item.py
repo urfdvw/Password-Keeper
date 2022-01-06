@@ -8,7 +8,7 @@ import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode
-
+# %%
 def ascii_mod(n):
     period = 126 - 32 + 1
     while n > 126:
@@ -17,20 +17,17 @@ def ascii_mod(n):
         n += period
     return n
 
-def vigenere(plain, key):
+def vigenere(plain, key, dir=1):
     out = ""
     i = 0
     for c in plain:
-        ci = chr(ascii_mod(ord(c) + key[i]))
-        if ci == '"':
-            print("here")
-            ci = '\\"'
+        ci = chr(ascii_mod(ord(c) + dir * ord(key[i])))
         out += ci
         i += 1
         if i == len(key):
             i = 0
     return out
-
+#%%
 class Item(BuzzerApp):
     def __init__(self):
         #%% data
@@ -73,6 +70,7 @@ class Item(BuzzerApp):
         # keyboard
         keyboard = Keyboard(usb_hid.devices)
         self.keyboard_layout = KeyboardLayoutUS(keyboard)
+        self.key = 'key'
 
     def update(self, ring):
         ring_get = ring.get()
@@ -85,7 +83,9 @@ class Item(BuzzerApp):
         if ring_get['buttons']['left'] == -1:
             self.keyboard_layout.write(self.data['username'])
         if ring_get['buttons']['down'] == -1:
-            self.keyboard_layout.write(self.data['password'])
+            self.keyboard_layout.write(
+                vigenere(self.data['password'],
+                self.key))
         if ring_get['buttons']['right'] == -1:
             self.keyboard_layout.write(self.data['link'])
         return 0, None

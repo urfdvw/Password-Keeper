@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Password Keeper Manager</title>
+
+    <style>
+        body {
+            color: rgb(248, 248, 242);
+            background-color: rgb(39, 40, 34);
+        }
+
+        .toolbar {
+            height: 20px;
+        }
+
+        #editor {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 100%
+        }
+    </style> 
+
+    <script src="https://pagecdn.io/lib/ace/1.4.13/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://pagecdn.io/lib/ace/1.4.13/ext-language_tools.js"></script>
+
+</head>
+
+<body>
+    <h1>Password Keeper Manager</h1>
+    <div class="toolbar">
+        <text id="filename"></text>
+        <button id="inputfile"> Open </button>
+        <button id="save" onClick='save_and_run(editor)'> Save </button>
+        <button onclick="save_code()"> Save as </button>
+    </div>
+    <div id="editor"></div>
+    <script type="text/javascript" src="code_basic.js">
+    </script>
+</body>
+
+</html>
