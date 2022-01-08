@@ -75,7 +75,7 @@ while True:
         if id(app) == id(app_menu):
             if shift_signal == 1:
                 if message == 0:
-                    app = app_accounts
+                    app = app_pass
                 if message == 1:
                     app = app_ball
         elif id(app) == id(app_pass):
