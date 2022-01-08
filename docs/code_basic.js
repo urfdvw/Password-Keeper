@@ -55,7 +55,6 @@ editor.commands.addCommand({
 /**
  * File related functions *********************************************************
  */
-var key = '';
 let fileHandle;
 var butOpenFile = document.getElementById("inputfile")
 butOpenFile.addEventListener('click', async () => {
@@ -65,7 +64,6 @@ butOpenFile.addEventListener('click', async () => {
     editor.setValue(decode(contents), -1);
     document.getElementById('filename').innerHTML = fileHandle.name;
     document.title = fileHandle.name
-    key = await prompt("Please type in the master key:", "");
 });
 
 async function writeFile(fileHandle, contents) {
@@ -159,7 +157,11 @@ function code(ciphered, dir) {
         for (var j=0; j<lines[i].length; j++){
             lines[i][j] = lines[i][j].trim();
         }
-        lines[i][lines[i].length - 1] = vigenere(lines[i][lines[i].length - 1], key, dir)
+        lines[i][lines[i].length - 1] = vigenere(
+            lines[i][lines[i].length - 1], 
+            document.getElementById('key').value, 
+            dir
+        )
         lines[i] = lines[i].join(',')
     }
     lines = lines.join('\n')
