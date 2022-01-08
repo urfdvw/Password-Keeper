@@ -59,18 +59,13 @@ var key = '';
 let fileHandle;
 var butOpenFile = document.getElementById("inputfile")
 butOpenFile.addEventListener('click', async () => {
-    key = await prompt("Please type in the master key:", "");
-    if (key == '') {
-        alert('Open file canceled.');
-        return
-    }
-
     [fileHandle] = await window.showOpenFilePicker();
     const file = await fileHandle.getFile();
     const contents = await file.text();
     editor.setValue(decode(contents), -1);
     document.getElementById('filename').innerHTML = fileHandle.name;
     document.title = fileHandle.name
+    key = await prompt("Please type in the master key:", "");
 });
 
 async function writeFile(fileHandle, contents) {
