@@ -83,6 +83,7 @@ class Item(BuzzerApp):
         if ring_get['buttons']['left'] == -1:
             self.keyboard_layout.write(self.data['username'])
         if ring_get['buttons']['down'] == -1:
+            print(self.key)
             self.keyboard_layout.write(
                 vigenere(self.data['password'],
                 self.key))
@@ -105,5 +106,6 @@ class Item(BuzzerApp):
         return 
 
     def receive(self, message):
-        self.data = message
+        self.data = message['data']
+        self.key = message['key']
         return

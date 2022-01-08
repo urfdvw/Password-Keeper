@@ -53,7 +53,7 @@ app_menu = MainMenu([
     'bounce ball',
 ])
 app_pass = Password()
-app = app_accounts
+app = app_pass
         
 #%% loop
 from timetrigger import Repeat
@@ -78,9 +78,14 @@ while True:
                     app = app_accounts
                 if message == 1:
                     app = app_ball
-        elif id(app) == id(app_accounts):
+        elif id(app) == id(app_pass):
             if shift_signal == -1:
                 app = app_menu
+            if shift_signal == 1:
+                app = app_accounts
+        elif id(app) == id(app_accounts):
+            if shift_signal == -1:
+                app = app_pass
             if shift_signal == 1:
                 app = app_item
         elif id(app) == id(app_item):

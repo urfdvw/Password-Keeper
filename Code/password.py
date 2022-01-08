@@ -50,9 +50,15 @@ class Password(BuzzerApp):
         self.key = '0'
 
     def update(self, ring):
-        self.ring_get = ring.get()
+        self.ring_get = ring.get(True)
         # buzzer
-        super().update(self.ring_get)
+        super().update(self.ring_get, True)
+        
+        
+        # if back
+        if self.ring_get['buttons_hold']['up'] == 1:
+            print('back')
+            return -1, None
         
         # input
         self.key = self.key[:-1] + \

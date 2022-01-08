@@ -62,7 +62,7 @@ class Menu(BuzzerApp):
         self.ind = 0
         self.ind_screen = 0
         
-    def update(self, ring, back):
+    def update(self, ring, back=False):
         self.ring_get = ring.get(back)
         # buzzer
         super().update(self.ring_get, back)

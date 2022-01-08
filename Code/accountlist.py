@@ -31,17 +31,27 @@ class AccountList(Menu):
         
         # call super
         super().__init__([self.data[i]['website'] for i in range(len(self.data))])
+        
+        # key
+        self.key = ''
     
     def update(self, ring):
-        super().update(ring, back=True)
+        super().update(ring)
             
         # if enter
         if self.ring_get['buttons']['center'] == -1:
-            return 1, self.data[self.mod(self.ind)]
+            return 1, {
+                'data': self.data[self.mod(self.ind)],
+                'key': self.key
+            }
             
         # if back
-        if self.ring_get['buttons_hold']['up'] == 1:
+        if self.ring_get['buttons']['up'] == -1:
             print('back')
             return -1, None
             
         return 0, None
+        
+    def receive(self, message):
+        if message:
+            self.key = message
