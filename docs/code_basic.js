@@ -154,6 +154,11 @@ function code(ciphered, dir) {
             continue;
         }
         lines[i] = lines[i].trim().split(',')
+        if (lines[i].length> 5){
+            lines[i][4] = lines[i].slice(4, lines[i].length).join(',')
+            lines[i] = lines[i].slice(0, 5)
+            console.log(lines[i])
+        }
         for (var j=0; j<lines[i].length; j++){
             lines[i][j] = lines[i][j].trim();
         }
