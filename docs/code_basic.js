@@ -24,8 +24,8 @@ editor.setOptions({
 
 editor.commands.addCommand({
     name: 'myCommand',
-    bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-    exec: function(editor) {
+    bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+    exec: function (editor) {
         save_and_run(editor);
     },
 });
@@ -107,32 +107,61 @@ function save_code() {
     }
 }
 
-function ascii_mod(n){
-    var period = 126 - 32 + 1
-    while (n > 126){
-        n -= period;
-    }
-    while (n < 32){
-        n += period;
-    }
-    return n
+/**
+ * Ascii related
+ */
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
 }
 
 function chr(n) {
     return String.fromCharCode(n)
 }
 
-function ord(c){
+function ord(c) {
     return c.charCodeAt(0);
 }
 
-function vigenere(plain, key, dir){
+function random_password() {
+    var special = '`~!@#$%^&*()_+=-][{}\'\;:\"\\|<>/?'
+    var out = "";
+    for (var i=0; i<3; i++){
+        out += chr(getRandomInt(26) + 65);
+        out += chr(getRandomInt(26) + 97);
+        out += chr(getRandomInt(10) + 48);
+        out += special[getRandomInt(special.length)]
+    }
+    out = Array(out)
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value).join('')
+    return out
+}
+
+function ascii_mod(n) {
+    var period = 126 - 32 + 1
+    while (n > 126) {
+        n -= period;
+    }
+    while (n < 32) {
+        n += period;
+    }
+    return n
+}
+
+
+/**
+ * Cipher related
+ */
+
+function vigenere(plain, key, dir) {
     var out = "";
     var i = 0;
-    for (var j=0; j<plain.length; j++){
+    for (var j = 0; j < plain.length; j++) {
         out += chr(ascii_mod(ord(plain[j]) + ord(key[i]) * dir))
         i += 1
-        if (i == key.length){
+        if (i == key.length) {
             i = 0;
         }
     }
@@ -149,22 +178,22 @@ function decode(plain) {
 
 function code(ciphered, dir) {
     var lines = ciphered.split('\n');
-    for (var i=0; i<lines.length; i++){
-        if (i==0){
+    for (var i = 0; i < lines.length; i++) {
+        if (i == 0) {
             continue;
         }
         lines[i] = lines[i].trim().split(',')
-        if (lines[i].length> 5){
+        if (lines[i].length > 5) {
             lines[i][4] = lines[i].slice(4, lines[i].length).join(',')
             lines[i] = lines[i].slice(0, 5)
             console.log(lines[i])
         }
-        for (var j=0; j<lines[i].length; j++){
+        for (var j = 0; j < lines[i].length; j++) {
             lines[i][j] = lines[i][j].trim();
         }
         lines[i][lines[i].length - 1] = vigenere(
-            lines[i][lines[i].length - 1], 
-            document.getElementById('key').value, 
+            lines[i][lines[i].length - 1],
+            document.getElementById('key').value,
             dir
         )
         lines[i] = lines[i].join(',')
