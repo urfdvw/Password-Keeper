@@ -59,7 +59,7 @@ Hardware and modules
 - I2C SSD1306 OLED screen
 
 Languages and libraries
-- CircuitPython
+- CircuitPython 7.0.0
     - displayio
     - usb_hid
     - touchio
