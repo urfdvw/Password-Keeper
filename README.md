@@ -1,6 +1,9 @@
 # Password Keeper
 A handy DIY off-line password management device.
 
+*This project is published under CC3.0 BY-NC-SA.
+This license lets others remix, adapt, and build upon your work **non-commercially**, as long as they credit you and license their new creations under the identical terms.*
+
 ## Why
 This DIY project is a USB password management device for people who
 - hate auto-saving passwords on browsers
@@ -10,9 +13,37 @@ This DIY project is a USB password management device for people who
 
 This project focus on user experiences. It is not for the highest security.
 
+## Based on
+Hardware and modules
+- Pi Pico
+- I2C SSD1306 OLED screen
+
+Languages and libraries
+- CircuitPython 7.0.0
+    - displayio
+    - usb_hid
+    - touchio
+- JavaScript
+    - Chrome File API
+    - Ace Editor
+
+Techniques
+- Finite state machines
+- Vigenère cipher
+
+## How to make
+- Make the PCB according to the graber file
+- Solder the components on to the PCB board
+- Install CircuitPython on the Pi Pico
+- Copy the code to the CIRCUITPY drive
+    - You will see errors because data file is missing for now
+    - See [New Password keeper User] for how to create a data file
+- 3D print the case according to the case, and glue it to te back
+
 ## How to use
 
 ### New Password keeper User
+- Make your Password keeper
 - Open [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/) in browser
 - Type in your master password
 - Type your account information in the `Deciphered Text` area, following csv formate
@@ -53,20 +84,16 @@ This project focus on user experiences. It is not for the highest security.
 - Change the Master Password in the manager
 - Click on [Save] to save modifications
 
-## Based on
-Hardware and modules
-- Pi Pico
-- I2C SSD1306 OLED screen
+## How to extend
+Software extension suggestion
+- You can make your own mini App and list it in the menu
+    - Please see []() for the basic structure of the APP
+    - Please see []() for Menu App class
 
-Languages and libraries
-- CircuitPython 7.0.0
-    - displayio
-    - usb_hid
-    - touchio
-- JavaScript
-    - Chrome File API
-    - Ace Editor
+Hardware extension suggestions
+- You can use the touch ring on any of your own DIY projects
+    - Driver class of the ring is [here]()
 
-Techniques
-- Finite state machines
-- Vigenère cipher
+All source files of this project are here in this repository
+
+# Happy Coding
