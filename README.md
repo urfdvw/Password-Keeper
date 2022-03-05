@@ -1,9 +1,6 @@
 # Password Keeper
 A handy DIY off-line password management device.
 
-*This project is published under CC3.0 BY-NC-SA.
-This license lets others remix, adapt, and build upon your work **non-commercially**, as long as they credit you and license their new creations under the identical terms.*
-
 ## Why
 This DIY project is a USB password management device for people who
 - hate auto-saving passwords on browsers
@@ -31,9 +28,11 @@ Techniques
 - Finite state machines
 - Vigenère cipher
 
+## Additional resource
+- For circuit and PCB, please check: https://oshwlab.com/urfdvw/password-keeper_copy_copy
+
 ## How to make
-- Make the PCB according to the graber file
-- Solder the components on to the PCB board
+- Make the PCB and solder the components on to the PCB board
 - Install CircuitPython on the Pi Pico
 - Copy the code to the CIRCUITPY drive
     - You will see errors because data file is missing for now
