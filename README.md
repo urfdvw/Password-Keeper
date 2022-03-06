@@ -1,3 +1,5 @@
+[中文文档](READMEZH.md)
+
 # Password Keeper
 A handy DIY off-line password management device.
 
@@ -6,9 +8,18 @@ This DIY project is a USB password management device for people who
 - hate auto-saving passwords on browsers
 - use public computers or changes devices all the time
 - are forced to set a different "strong" password every month (me)
-- have a lot of super-long passwords, such as Github keys and SSH keys.
+- have a lot of super-long passwords, such as Github keys and SSH keys
+- just want to try out another CircuitPython Project. 
 
-This project focus on user experiences. It is not for the highest security.
+***Disclaimer**:
+This project only contains an off-line microcontroller code and a static pure front-end page.
+Your password data will not be stored or sent via the internet due to the effect of this project.
+This project focus on user experiences.
+In other words,
+using this project cannot improve the security of your passwords.
+The author of this project is not responsible for any possible loss or leak of your passwords or accounts.
+Using the code in this repository means you accept this disclaimer, fully understand the code's functionality,
+and will take all risks.*
 
 ## Based on
 Hardware and modules
@@ -37,7 +48,7 @@ Techniques
 - Copy the code to the CIRCUITPY drive
     - You will see errors because data file is missing for now
     - See [New Password keeper User] for how to create a data file
-- 3D print the case according to the case, and glue it to te back
+- 3D print the case according to the case, and glue it to the back
 
 ## How to use
 
@@ -86,13 +97,9 @@ Techniques
 ## How to extend
 Software extension suggestion
 - You can make your own mini App and list it in the menu
-    - Please see []() for the basic structure of the APP
-    - Please see []() for Menu App class
 
 Hardware extension suggestions
 - You can use the touch ring on any of your own DIY projects
-    - Driver class of the ring is [here]()
 
-All source files of this project are here in this repository
-
+---
 # Happy Coding
