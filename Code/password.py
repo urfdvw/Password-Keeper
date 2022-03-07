@@ -4,6 +4,7 @@ from adafruit_display_text import label, wrap_text_to_lines
 from timetrigger import Timer
 from buzzer import BuzzerApp
 from item import ascii_mod
+from time import sleep
 
 class Password(BuzzerApp):
     def __init__(self):
@@ -54,12 +55,6 @@ class Password(BuzzerApp):
         # buzzer
         super().update(self.ring_get, True)
         
-        
-        # if back
-        if self.ring_get['buttons_hold']['up'] == 1:
-            print('back')
-            return -1, None
-        
         # input
         self.key = self.key[:-1] + \
             chr(ascii_mod(ord(self.key[-1]) + self.ring_get['dial']))
@@ -67,6 +62,7 @@ class Password(BuzzerApp):
         # logic
         if self.ring_get['buttons_hold']['up'] == 1:
             # back
+            self.key = '0' # remove the current key
             return -1, None
         if self.ring_get['buttons']['center'] == -1:
             # enter
@@ -77,7 +73,8 @@ class Password(BuzzerApp):
         if self.ring_get['buttons']['left'] == -1:
             # backspace
             if len(self.key) > 1:
-                self.key = self.key[:-1]
+                self.key = self.key[:-1] # remove the last charactor
+                self.key = self.key[:-1] + '0' # change the visible charactor to '0'
         if self.ring_get['buttons']['up'] == -1:
             self.key = self.key[:-1] + \
                 chr(ascii_mod(ord(self.key[-1]) - 10))
@@ -95,7 +92,7 @@ class Password(BuzzerApp):
         if cursor != self.cursor_text.text:
             self.cursor_text.text = cursor
         if self.key != self.all_text.text:
-            self.all_text.text = self.key
+            self.all_text.text = '*' * (len(self.key))
             
         self.cursor_disp.x = 6 * self.scale * (len(self.all_text.text) - 1)
         self.cursor_text.anchored_position = (self.cursor_disp.x, 32)
