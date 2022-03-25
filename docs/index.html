@@ -21,6 +21,16 @@
             left: 0;
             height: 100%
         }
+
+        table{
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        th, td{
+            padding: 10px 20px;
+            border: 1px solid rgb(191, 191, 191);
+        }
     </style> 
 
     <script src="https://pagecdn.io/lib/ace/1.4.13/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -41,6 +51,8 @@
         <button onclick="editor.insert(random_password())"> Random Password </button>
     </div>
     <div id="editor">website, note, link, username, password</div>
+    <h3>Deciphered Text Table View</h3>
+    <table id="display" ></table>
     <script type="text/javascript" src="code_basic.js">
     </script>
 </body>

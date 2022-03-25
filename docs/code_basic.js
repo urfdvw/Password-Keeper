@@ -126,7 +126,7 @@ function ord(c) {
 function random_password() {
     var special = '`~!@#$%^&*()_+=-][{}\'\;:\"\\|<>/?'
     var out = "";
-    for (var i=0; i<3; i++){
+    for (var i = 0; i < 3; i++) {
         out += chr(getRandomInt(26) + 65);
         out += chr(getRandomInt(26) + 97);
         out += chr(getRandomInt(10) + 48);
@@ -201,3 +201,58 @@ function code(ciphered, dir) {
     lines = lines.join('\n')
     return lines
 }
+
+/**
+ * CSV
+ */
+
+function update_table() {
+    var table = document.getElementById('display');
+    table.style = ''
+    table.innerHTML = '';
+    var thead = document.createElement('thead');
+    var tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    var text = editor.getValue().split('\n');
+    for (var i = 0; i < text.length; i++) {
+        if (text[i].trim().length == 0) {
+            continue
+        }
+        var row = text[i].trim().split(',');
+        var tablerow = document.createElement('tr');
+
+
+        if (i == 0) {
+            var cell = document.createElement('th');
+            cell.innerHTML = '<plaintext>' + "line"
+        } else {
+            var cell = document.createElement('td') 
+            cell.innerHTML = '<plaintext>' + (i + 1)
+        }
+        tablerow.appendChild(cell);
+
+        for (var j = 0; j < row.length; j++) {
+            if (i == 0) {
+                var cell = document.createElement('th');
+            } else {
+                var cell = document.createElement('td');
+            }
+            cell.innerHTML = '<plaintext>' + row[j].trim()
+            tablerow.appendChild(cell);
+        }
+        if (i == 0) {
+            thead.appendChild(tablerow);
+        } else {
+            tbody.appendChild(tablerow);
+        }
+
+    }
+}
+
+update_table();
+
+editor.getSession().on('change', function () {
+    update_table()
+});
