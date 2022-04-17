@@ -14,14 +14,33 @@ from clickwheel import Ring, Button
 center = Button(board.GP9)
 ring = Ring(
     [
-        board.GP10,
-        board.GP12,
-        board.GP27,
-        board.GP21,
+        board.GP10, # left
+        board.GP12, # up
+        board.GP27, # down
+        board.GP21, # right
     ],
     center,
 )
-# use pre measured max and min
+
+#%% find the range of raw_value for ring pad.
+if False:
+    from time import monotonic, sleep
+    tic = monotonic()
+    ring_max = [0] * 4
+    ring_min = [100000] * 4
+    while monotonic() - tic < 5:
+        for i in range(4):
+            value = ring.ring[i].raw_value
+            ring_max[i] = max(ring_max[i], value)
+            ring_min[i] = min(ring_min[i], value)
+            # print(ring_max, ring_min)
+            sleep(0.1)
+    print(ring_max, ',', ring_min)
+    # cancel running the original script
+    import sys
+    sys.exit()
+
+#%% use pre measured max and min
 ring.max, ring.min = [2322, 2651, 2147, 2009], [794, 807, 941, 785]
 
 #%% define screen
@@ -35,8 +54,9 @@ i2c = busio.I2C(board.GP17, board.GP16, frequency=int(1e6))
 display_bus = displayio.I2CDisplay(i2c, device_address=0x3C, reset=oled_reset)
 WIDTH = 128
 HEIGHT = 64
+ROTATION = 0 # or 180
 FPS_SET = 30
-display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT)
+display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=ROTATION)
 
 #%% apps
 from bounceball import BounceBall
