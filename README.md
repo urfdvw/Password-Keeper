@@ -3,7 +3,7 @@
 # Password Keeper
 A handy DIY off-line password management device.
 
-![](media/2022-05-08-17-01-17.png)
+<img src="media/2022-05-08-17-01-17.png" style="width:200px;"/>
 
 ## Why
 This DIY project is a USB password management device for people who
