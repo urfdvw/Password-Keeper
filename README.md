@@ -48,7 +48,6 @@ Techniques
 - Make the PCB and solder the components on to the PCB board
 - Install CircuitPython on the Pi Pico
 - Copy the code to the CIRCUITPY drive
-    - See [New Password keeper User] for how to create a data file
 - 3D print the case according to the case, and glue it to the back
 
 ### Example data

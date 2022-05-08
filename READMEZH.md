@@ -49,7 +49,6 @@
 - PCB 打样后并焊接元件。
 - 在 Pi Pico 上安装 CircuitPython。
 - 将本 repository 中的代码拷贝到 CIRCUITPY 磁盘中。
-    - 关于如何加载密码数据到单片机，请查看本文档后续的部分。
 - 将本 repository 中的后盖 3D 模型打印出来，并用热熔胶粘接到 PCB 后面。
 
 ### 数据样例
