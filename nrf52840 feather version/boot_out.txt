@@ -1,0 +1,2 @@
+Adafruit CircuitPython 7.2.5 on 2022-04-06; Adafruit Feather nRF52840 Express with nRF52840
+Board ID:feather_nrf52840_express
