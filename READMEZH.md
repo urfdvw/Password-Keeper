@@ -49,19 +49,28 @@
 - PCB 打样后并焊接元件。
 - 在 Pi Pico 上安装 CircuitPython。
 - 将本 repository 中的代码拷贝到 CIRCUITPY 磁盘中。
-    - 这时会报错，因为还没有加载密码数据。
     - 关于如何加载密码数据到单片机，请查看本文档后续的部分。
 - 将本 repository 中的后盖 3D 模型打印出来，并用热熔胶粘接到 PCB 后面。
 
+### 数据样例
+在新制作的账簿中包含一个样例数据文件 `items.csv`。
+    - 其主密钥为 `0` （一个包含数字“零”的字符串）。
+    - 第 `i` 个账户的密码是 `password{i}`，其中 `{i}` 是占位符。
+
 ## 如何使用
 
-### 如果你是新用户
-- 制作一个**密码账簿**
+### 更新密码数据
+- 用 USB 线将密码账簿设备链接到电脑
 - 在浏览器中打开网页 [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/)
 - 在 `master password` 处输入主密钥
-- 在 `Deciphered Text` 处按提示顺序和 csv 的格式，输入你想保存的账户信息。
-- 点击界面中的 [Save As] 按键下载密码数据文件，其文件名为 `items.csv`。该文件是加密过的文件。
-- 用 USB 线将密码账簿设备链接到电脑，然后将刚下载的 `items.csv` 文件保存到 `CIRCUITPY` 磁盘中。
+    - 如果您是第一次使用，默认的主密钥为 `0` （一个包含数字“零”的字符串）。
+- 点击界面中的 [Open] 按键，选择 `CIRCUITPY` 磁盘中的 `items.csv` 文件
+    - 密码数据会显示在 `Deciphered Text` 区域
+    - 如果主密钥输入错误， 那么显示出来的数据会是错误的数据。
+- 在 `Deciphered Text` 区域增加或者修改密码数据。
+- 如果您需要，也可以点击 [Random Password] 按键，这样会在光标处输入一段纯随机的强密码。
+- 点击界面中的 [Save] 按键，所有的修改会被保存。
+- ***注意：强烈建议您将 `items.csv` 备份在安全的地方。*** 
 
 ### 如何使用**密码账簿**设备
 - 用 USB 线将密码账簿设备链接到电脑
@@ -79,18 +88,6 @@
     - 左键输入用户名
     - 下键输入密码
     - 上键返回到账户列表
-
-### 更新密码数据
-- 用 USB 线将密码账簿设备链接到电脑
-- 在浏览器中打开网页 [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/)
-- 在 `master password` 处输入主密钥
-- 点击界面中的 [Open] 按键，选择 `CIRCUITPY` 磁盘中的 `items.csv` 文件
-    - 密码数据会显示在 `Deciphered Text` 区域
-    - 如果主密钥输入错误， 那么显示出来的数据会是错误的数据。
-- 在 `Deciphered Text` 区域增加或者修改密码数据。
-- 如果您需要，也可以点击 [Random Password] 按键，这样会在光标处输入一段纯随机的强密码。
-- 点击界面中的 [Save] 按键，所有的修改会被保存。
-- ***注意：强烈建议您将 `items.csv` 备份在安全的地方。*** 
 
 ### 修改主密钥
 - 在 [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/) 中，用原有的主密钥打开`items.csv`。

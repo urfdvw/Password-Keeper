@@ -48,19 +48,27 @@ Techniques
 - Make the PCB and solder the components on to the PCB board
 - Install CircuitPython on the Pi Pico
 - Copy the code to the CIRCUITPY drive
-    - You will see errors because data file is missing for now
     - See [New Password keeper User] for how to create a data file
 - 3D print the case according to the case, and glue it to the back
 
+### Example data
+In newly made keeper device, the default data file `items.csv` contains some example data.
+    - master password is `0` (one digit string zero),
+    - password of the `i`th item is `password{i}`, where `{i}` is a placeholder.
+
 ## How to use
 
-### New Password keeper User
-- Make your Password keeper
+### Update data
+- Connect your password keeper to your computer
 - Open [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/) in browser
 - Type in your master password
-- Type your account information in the `Deciphered Text` area, following csv formate
-- Click on [Save As] to download the ciphered data file `items.csv`
-- Connect your password keeper to your computer and move downloaded `items.csv` to your `CIRCUITPY` drive
+    - If it is the first time you use it, the default master password is `0` (one digit string zero),
+- Click on [Open] and open the `items.csv` file on your `CIRCUITPY` drive
+    - If your master password is wrong, the `Deciphered Text` is going to show wrong passwords
+- Make changes to your account information in the `Deciphered Text` area, following csv formate
+- If you need a new, you can click on [Random Password] button to generate a strong password.
+- Click on [Save] to save changes
+- ***It is suggested that you keep a backup of `items.csv` by [Save As], and store that ciphered data file in a safe place*** 
 
 ### Log in using the password keeper
 - Connect the Password Keeper with the computer or phone with proper USB wire
@@ -78,17 +86,6 @@ Techniques
     - left to type in user name
     - down to type in password
     - up to go back
-
-### Update data
-- Connect your password keeper to your computer
-- Open [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/) in browser
-- Type in your master password
-- Click on [Open] and open the `items.csv` file on your `CIRCUITPY` drive
-    - If your master password is wrong, the `Deciphered Text` is going to show wrong passwords
-- Make changes to your account information in the `Deciphered Text` area, following csv formate
-- If you need a new, you can click on [Random Password] button to generate a strong password.
-- Click on [Save] to save changes
-- ***It is suggested that you keep a backup of `items.csv` by [Save As], and store that ciphered data file in a safe place*** 
 
 ### Change Master Password
 - With current Master Password, Open your ciphered data file `items.csv` in the [Password Keeper Manager](https://urfdvw.github.io/Password-Keeper/)
