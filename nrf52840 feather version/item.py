@@ -4,6 +4,7 @@ from terminalio import FONT
 from adafruit_display_text import label, wrap_text_to_lines
 from timetrigger import Timer
 from buzzer import BuzzerApp
+from time import sleep
 
 #%% USB libs
 import usb_hid
@@ -95,6 +96,11 @@ class Item(BuzzerApp):
             scan_response.complete_name = "CircuitPython HID"
             
             ble = adafruit_ble.BLERadio()
+            if not ble.connected:
+                print("\n" * 4 + "advertising")
+                ble.start_advertising(advertisement, scan_response)
+                sleep(0.5)
+            
             keyboard = Keyboard(hid.devices)
             self.keyboard_layout = KeyboardLayoutUS(keyboard)
             
