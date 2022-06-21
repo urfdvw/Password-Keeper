@@ -7,17 +7,17 @@ import board
 
 #%% buzzer
 from buzzer import Buzzer
-buzzer = Buzzer(board.GP0)
+buzzer = Buzzer(board.D10)
 
 #%% clickwheel
 from clickwheel import Ring, Button
-center = Button(board.GP9)
+center = Button(board.D8)
 ring = Ring(
     [
-        board.GP10, # left
-        board.GP12, # up
-        board.GP27, # down
-        board.GP21, # right
+        board.D6, # left
+        board.D7, # up
+        board.D0, # down
+        board.D9, # right
     ],
     center,
 )
@@ -39,9 +39,9 @@ if False:
     # cancel running the original script
     import sys
     sys.exit()
-
+    
 #%% use pre measured max and min
-ring.max, ring.min = [2322, 2651, 2147, 2009], [794, 807, 941, 785]
+ring.max, ring.min = [1830, 1769, 2070, 1603], [841, 920, 1238, 880]
 
 #%% define screen
 import busio
@@ -50,13 +50,11 @@ import adafruit_displayio_ssd1306
 
 displayio.release_displays()
 oled_reset = None
-i2c = busio.I2C(board.GP17, board.GP16, frequency=int(1e6))
+i2c = busio.I2C(board.SCL, board.SDA, frequency=int(1e6))
 display_bus = displayio.I2CDisplay(i2c, device_address=0x3C, reset=oled_reset)
 WIDTH = 128
 HEIGHT = 64
-ROTATION = 0 # or 180
-FPS_SET = 30
-display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=ROTATION)
+display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=180)
 
 #%% Background apps
 from background import FpsControl, FpsMonitor, NumLocker, MouseJitter

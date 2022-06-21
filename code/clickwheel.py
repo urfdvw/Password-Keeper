@@ -4,6 +4,15 @@ from math import sqrt, atan2, pi
 import time
 from timetrigger import Timer
 
+
+def theta_diff(a, b):
+    c = a - b
+    if c >= pi:
+        c -= 2 * pi
+    if c < - pi:
+        c += 2 * pi
+    return c
+
 # define button
 class Button:
     def __init__(self, pin):
@@ -74,7 +83,7 @@ class Ring:
         # timer
         self.hold_timer = Timer()
         
-    def get(self, long=False, long_back=False):
+    def get(self):
         # read sensor
         center_now = self.center.get()
         ring_now = [r.raw_value for r in self.ring]
@@ -121,13 +130,21 @@ class Ring:
         # touch conditions
         if self.touch and not self.touch_last: # ring touch edge
             buttons['ring'] = 1
-            # init states
+            if self.pos_x > abs(self.pos_y): # right
+                buttons['right'] = 1
+            if self.pos_x < -abs(self.pos_y): # left
+                buttons['left'] = 1
+            if self.pos_y > abs(self.pos_x): # up
+                buttons['up'] = 1
+            if self.pos_y < -abs(self.pos_x): # down
+                buttons['down'] = 1
+            # init dial states
             self.theta_residual = 0
             self.theta_last = self.theta
             self.dial_changed = False
         elif self.touch and self.touch_last: # ring hold
             buttons['ring'] = 2
-            self.theta_residual += self.theta_diff(self.theta, self.theta_last)
+            self.theta_residual += theta_diff(self.theta, self.theta_last)
             while self.theta_residual > pi / self.dial_N:
                 self.theta_residual -= 2 * pi / self.dial_N
                 dial += 1
@@ -159,33 +176,26 @@ class Ring:
             'down': 0,
             'center': 0,
         }
-        if long_back: # only detect long press of back
-            if buttons['ring'] == 1:
-                self.hold_timer.start(1)
-            if buttons['ring'] == 2 and self.hold_timer.over():
-                if not self.dial_changed:
-                    if self.pos_y > abs(self.pos_x): # up
-                        self.dial_changed = True
-                        buttons_hold['up'] = 1
-        if long: # detect all long presses
-            if buttons['ring'] == 1:
-                self.hold_timer.start(1)
-            if buttons['ring'] == 2 and self.hold_timer.over():
-                if not self.dial_changed:
-                    self.dial_changed = True
-                    if self.pos_x > abs(self.pos_y): # right
-                        buttons_hold['right'] = 1
-                    if self.pos_x < -abs(self.pos_y): # left
-                        buttons_hold['left'] = 1
-                    if self.pos_y > abs(self.pos_x): # up
-                        buttons_hold['up'] = 1
-                    if self.pos_y < -abs(self.pos_x): # down
-                        buttons_hold['down'] = 1
-            if center_now == 1:
-                self.hold_timer.start(1)
-            if center_now == 2 and self.hold_timer.over():
-                buttons_hold['center'] = 1
-                self.center.en = False
+
+        # long press
+        if buttons['ring'] == 1:
+            self.hold_timer.start(1)
+        if buttons['ring'] == 2 and self.hold_timer.over():
+            if not self.dial_changed:
+                self.dial_changed = True
+                if self.pos_x > abs(self.pos_y): # right
+                    buttons_hold['right'] = 1
+                if self.pos_x < -abs(self.pos_y): # left
+                    buttons_hold['left'] = 1
+                if self.pos_y > abs(self.pos_x): # up
+                    buttons_hold['up'] = 1
+                if self.pos_y < -abs(self.pos_x): # down
+                    buttons_hold['down'] = 1
+        if center_now == 1:
+            self.hold_timer.start(1)
+        if center_now == 2 and self.hold_timer.over():
+            buttons_hold['center'] = 1
+            self.center.en = False
             
         # output
         out = {
@@ -200,11 +210,3 @@ class Ring:
         self.touch_last = self.touch
         self.theta_last = self.theta
         return out
-    
-    def theta_diff(self, a, b):
-        c = a - b
-        if c >= pi:
-            c -= 2 * pi
-        if c < - pi:
-            c += 2 * pi
-        return c

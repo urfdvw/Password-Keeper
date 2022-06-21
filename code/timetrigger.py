@@ -22,15 +22,15 @@ class Timer:
         self.enable = False
         
 class Repeat:
-    def __init__(self, FPS):
+    def __init__(self, freq):
         self.timer = Timer()
-        self.FPS = 0 # measurement
-        self.duration = 1 / FPS # set
+        self.freq_measure = 0 # measurement
+        self.freq_set = freq
         self.timer.start(0)
     def check(self):
         if self.timer.over():
-            self.FPS = 1 / self.timer.dt
-            self.timer.start(self.duration)
+            self.freq_measure = 1 / self.timer.dt
+            self.timer.start(1 / self.freq_set)
             return True
         else:
             return False
