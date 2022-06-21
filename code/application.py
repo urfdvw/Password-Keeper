@@ -238,7 +238,12 @@ class Password(Application):
             or ring_get['dial']:
             # if press or slide
             self.freq = 1000
-        if ring_get['buttons']['ring'] == -1:
+        if -1 in (
+                ring_get['buttons']['up'],
+                ring_get['buttons']['down'],
+                ring_get['buttons']['left'],
+                ring_get['buttons']['right'],
+            ):
             self.freq = 1200
 
         # logic
