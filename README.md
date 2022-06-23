@@ -95,9 +95,10 @@ In newly made keeper device, the default data file `items.csv` contains some exa
 ## How to extend
 Software extension suggestion
 - You can make your own mini App and list it in the menu
+    - Please see [Developer Memo](./memo.md) for details
 
 Hardware extension suggestions
 - You can use the touch ring on any of your own DIY projects
-
+    - The [driver code](./code/driver.py) can be used directly
 ---
 # Happy Coding

@@ -1,4 +1,33 @@
-# import
+"""
+This script contains driver classes for perferials, include
+- buzzer
+- the PCB touch clickwheel (sometimes called the `ring` in the code)
+"""
+#%% buzzer
+import pwmio
+
+# define buzzer
+class Buzzer:
+    """
+    Driver class of the buzzer
+    """
+    def __init__(self, pin):
+        self.buzzer = pwmio.PWMOut(pin, variable_frequency=True)
+        self.buzzer.duty_cycle = 0
+    def beep(self, freq):
+        """
+        Turn the buzzer on at a certain sound wave frequency
+        freq=0 to turn off
+        """
+        if freq == 0:
+            self.buzzer.duty_cycle = 0
+            return
+        else:
+            self.buzzer.frequency = freq
+            self.buzzer.duty_cycle = 32768
+            return
+
+#%% clickwheel
 import touchio
 from math import sqrt, atan2, pi
 import time
@@ -15,6 +44,9 @@ def theta_diff(a, b):
 
 # define button
 class Button:
+    """
+    Driver class of a single button
+    """
     def __init__(self, pin):
         self.touch = touchio.TouchIn(pin)
         self.need_init = True
@@ -40,7 +72,7 @@ class Button:
                 out = -1 # release edge
         elif self.current and self.last:
             out = 2 # hold
-            
+
         self.last = self.current
         if self.en:
             return out
@@ -49,6 +81,9 @@ class Button:
 
 # define ring
 class Ring:
+    """
+    Driver class of the touch clickwheel
+    """
     def __init__(self, pins, center, N=8):
         # center button
         self.center = center
@@ -76,48 +111,45 @@ class Ring:
         self.r = 0
         self.theta = 0
         self.theta_last = 0
+        self.theta_d = 0
         self.theta_residual = 0
         self.touch = False
         self.touch_last = False
         self.dial_changed = False
         # timer
         self.hold_timer = Timer()
-        
+
     def get(self):
         # read sensor
         center_now = self.center.get()
         ring_now = [r.raw_value for r in self.ring]
-        
-        # # update max and min
-        # self.min = [min(zr) for zr in zip(ring_now, self.min)]
-        # self.max = [max(zr) for zr in zip(ring_now, self.max)]
-        
+
         # conver sensor to weights
         w = [
-            (ring_now[i] - self.min[i]) / (self.max[i] - self.min[i]) 
+            (ring_now[i] - self.min[i]) / (self.max[i] - self.min[i])
             for i in range(4)
         ]
-        
+
         # computer vector sum
         pos_x = sum([w[i] * self.alter_x[i] for i in range(4)])
         pos_y = sum([w[i] * self.alter_y[i] for i in range(4)])
-        
+
         # 1st-order low pass filter
         self.pos_x = pos_x * self.filtering_alpha \
             + self.pos_x * (1 - self.filtering_alpha)
         self.pos_y = pos_y * self.filtering_alpha \
             + self.pos_y * (1 - self.filtering_alpha)
-        
+
         # covert xy to polar
         self.r = sqrt(self.pos_x ** 2 + self.pos_y ** 2)
         self.theta = atan2(self.pos_y, self.pos_x)
-        
+
         # covert r to touch
         self.touch = self.r > 0.3
-        
+
         # init outputs
         dial = 0
-        
+
         buttons = {
             'left': 0,
             'right': 0,
@@ -126,7 +158,7 @@ class Ring:
             'center': 0,
             'ring': 0,
         }
-        
+
         # touch conditions
         if self.touch and not self.touch_last: # ring touch edge
             buttons['ring'] = 1
@@ -140,11 +172,13 @@ class Ring:
                 buttons['down'] = 1
             # init dial states
             self.theta_residual = 0
+            self.theta_d = 0
             self.theta_last = self.theta
             self.dial_changed = False
         elif self.touch and self.touch_last: # ring hold
             buttons['ring'] = 2
-            self.theta_residual += theta_diff(self.theta, self.theta_last)
+            self.theta_d = theta_diff(self.theta, self.theta_last)
+            self.theta_residual += self.theta_d
             while self.theta_residual > pi / self.dial_N:
                 self.theta_residual -= 2 * pi / self.dial_N
                 dial += 1
@@ -167,7 +201,7 @@ class Ring:
         else: # ring idle
             # center button only works when ring is not touched
             buttons['center'] = center_now
-            
+
         # hold detect
         buttons_hold = {
             'left': 0,
@@ -196,16 +230,17 @@ class Ring:
         if center_now == 2 and self.hold_timer.over():
             buttons_hold['center'] = 1
             self.center.en = False
-            
+
         # output
         out = {
             'dial': -dial,
             'buttons': buttons,
             'buttons_hold': buttons_hold,
             'theta': self.theta,
+            'theta_d': -self.theta_d,
             'r': self.r,
         }
-        
+
         # update
         self.touch_last = self.touch
         self.theta_last = self.theta

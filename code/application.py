@@ -1,22 +1,27 @@
+"""
+This script contains all classes for
+Applications with UI
+"""
 # Python
 import random
 from math import pi
-from buzzer import Buzzer
 # CircuitPython
 import displayio
 from terminalio import FONT
-import usb_hid
 # Adafruit
 from adafruit_display_text import label, wrap_text_to_lines
-from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
 # Keeper
 from timetrigger import Timer
 
 class Application:
-    def update(self):
-        """ update related to main logic, once every fixed period
+    """
+    Abstract class of UI Applications
+    """
+    def update(self, ring_get):
+        """ update related to main logic, once every frame
+        ring_get: dict: data acquired from touch input
         return:
             shift: int
                 0, no shift
@@ -28,16 +33,18 @@ class Application:
                 message broadcast to all app
         """
         raise NotImplementedError
-    def display(self):
+    def display(self, oled, buzzer):
         """ OLED and buzzer output """
         raise NotImplementedError
-    def receive(self):
-        """ process received message and start """
+    def receive(self, message, memo):
+        """ process received message and initialize states """
         raise NotImplementedError
 
 class BounceBall(Application):
-    def __init__(self): 
-
+    """
+    Bounce ball game
+    """
+    def __init__(self):
         # ball variables
         self.ball_size = 5
         self.ball_x = 0
@@ -50,15 +57,15 @@ class BounceBall(Application):
 
         # display
         self.splash = displayio.Group()
-        
+
         # draw a square (ball)
         self.ball_bitmap = displayio.Bitmap(self.ball_size, self.ball_size, 1)
         color_palette = displayio.Palette(1)
         color_palette[0] = 0xFFFFFF  # White
         self.ball_disp = displayio.TileGrid(
-            self.ball_bitmap, 
-            pixel_shader=color_palette, 
-            x=int(self.ball_x), 
+            self.ball_bitmap,
+            pixel_shader=color_palette,
+            x=int(self.ball_x),
             y=int(self.ball_y)
         )
         self.splash.append(self.ball_disp)
@@ -72,9 +79,9 @@ class BounceBall(Application):
         color_palette = displayio.Palette(1)
         color_palette[0] = 0xFFFFFF  # White
         self.pad_disp = displayio.TileGrid(
-            self.pad_bitmap, 
-            pixel_shader=color_palette, 
-            x=self.pad_x-self.pad_size//2, 
+            self.pad_bitmap,
+            pixel_shader=color_palette,
+            x=self.pad_x-self.pad_size//2,
             y=63)
         self.splash.append(self.pad_disp)
 
@@ -85,7 +92,7 @@ class BounceBall(Application):
             FONT, text=text, color=0xFFFFFF, x=0, y=4
         )
         self.splash.append(self.text_area)
-        
+
         # game states
         self.freq = 0
         self.info = ''
@@ -93,8 +100,9 @@ class BounceBall(Application):
         self.game_over = False
         self.count_up = False
         self.game_over_timer = Timer()
-    
+
     def init(self):
+        self.pad_x = 0
         self.ball_x = 0
         self.ball_y = 32
         self.ball_dx = 0.95
@@ -102,15 +110,9 @@ class BounceBall(Application):
         self.count = 0
         self.count_up = True
         self.info = '0'
-        
+
     def update(self, ring_get):
         self.freq = 0
-        
-        # if back
-        if ring_get['buttons_hold']['up'] == 1:
-            return -1, {
-                'count': self.count,
-            }, {}
 
         # if game over
         if self.game_over == 2 and ring_get['buttons']['ring'] == 1:
@@ -124,15 +126,27 @@ class BounceBall(Application):
             # ui buzzer
             if ring_get['buttons']['up'] == 1:
                 self.freq = 1000
+            # if back
+            if ring_get['buttons_hold']['up'] == 1:
+                return -1, {
+                    'count': self.count,
+                }, {}
             return 0, {}, {}
-        
+
         # physics
         self.ball_dy += self.ball_ay
         self.ball_x += self.ball_dx
         self.ball_y += self.ball_dy
-        
+
         if ring_get['buttons']['ring']:
-            self.pad_x = (1 - abs(ring_get['theta']) / pi) * 127 - self.pad_size // 2
+            if False:  # absolute position
+                self.pad_x = (1 - abs(ring_get['theta']) / pi) * 127 - self.pad_size // 2
+            else: # relative position
+                self.pad_x += ring_get['theta_d'] * 30
+                if self.pad_x < -self.pad_size / 2:
+                    self.pad_x = -self.pad_size / 2
+                if self.pad_x > 128 - self.pad_size / 2:
+                    self.pad_x = 128 - self.pad_size / 2
         # logic
         if self.ball_x < 0:
             self.ball_x = - self.ball_x
@@ -165,7 +179,7 @@ class BounceBall(Application):
                 self.info = str(self.count) + '  game over\ntouch ring to restart\nhold back to back'
                 self.count_up = True
         return 0, {}, {}
-                
+
     def display(self, display, buzzer):
         # display
         display.show(self.splash)
@@ -173,11 +187,12 @@ class BounceBall(Application):
         self.ball_disp.y = int(self.ball_y)
         self.pad_disp.x = int(self.pad_x)
         if self.count_up:
+            # change info text only when count changes
             self.count_up = False
             self.text_area.text = self.info
         # Buzzer
         buzzer.beep(freq=self.freq)
-        
+
     def receive(self, message, memo):
         print('Entered the bounce ball app')
         self.freq = 1200
@@ -185,16 +200,17 @@ class BounceBall(Application):
             self.init()
 
 class Password(Application):
+    """ App for typing master key on the clickwheel """
     def __init__(self):
         # buzzer
         self.freq = 0
 
         # display setting
         self.scale = 2
-        
+
         # display
         self.splash = displayio.Group()
-        
+
         # all text
         self.all_text = label.Label(
             FONT,
@@ -205,18 +221,18 @@ class Password(Application):
             scale = self.scale
         )
         self.splash.append(self.all_text)
-        
+
         # draw a square (cursor)
         self.cursor_bitmap = displayio.Bitmap(6 * self.scale, 32, 1)
         color_palette = displayio.Palette(1)
         color_palette[0] = 0xFFFFFF  # White
         self.cursor_disp = displayio.TileGrid(
-            self.cursor_bitmap, 
+            self.cursor_bitmap,
             pixel_shader=color_palette,
             x=0, y=16,
         )
         self.splash.append(self.cursor_disp)
-                
+
         # cursor text
         self.cursor_text = label.Label(
             FONT,
@@ -227,24 +243,15 @@ class Password(Application):
             scale = self.scale,
         )
         self.splash.append(self.cursor_text)
-        
+
         # keyboard
         self.key = '0'
 
     def update(self, ring_get):
-        # buzzer
-        if ring_get['buttons']['center'] == 1 \
-            or ring_get['buttons']['ring'] == 1 \
-            or ring_get['dial']:
-            # if press or slide
+        # buzzer sound when press center
+        # typing is muted to protect the key
+        if ring_get['buttons']['center'] == 1:
             self.freq = 1000
-        if -1 in (
-                ring_get['buttons']['up'],
-                ring_get['buttons']['down'],
-                ring_get['buttons']['left'],
-                ring_get['buttons']['right'],
-            ):
-            self.freq = 1200
 
         # logic
         if ring_get['buttons_hold']['up'] == 1:
@@ -263,39 +270,41 @@ class Password(Application):
                 self.key = self.key[:-1] # remove the last charactor
                 self.key = self.key[:-1] + '0' # change the visible charactor to '0'
         if ring_get['buttons']['up'] == -1:
+            # fast forward
             self.key = self.key[:-1] + \
                 chr(ascii_mod(ord(self.key[-1]) - 10))
         if ring_get['buttons']['down'] == -1:
+            # fast backward
             self.key = self.key[:-1] + \
                 chr(ascii_mod(ord(self.key[-1]) + 10))
 
         # key input
         self.key = self.key[:-1] + \
             chr(ascii_mod(ord(self.key[-1]) + ring_get['dial']))
-            
-        
+
         return 0, {}, {'key': self.key}
 
     def display(self, display, buzzer):
         # OLED
         display.show(self.splash)
-        
+
         cursor = self.key[-1]
         if cursor != self.cursor_text.text:
             self.cursor_text.text = cursor
         if self.key != self.all_text.text:
             self.all_text.text = '*' * (len(self.key))
-            
+
         self.cursor_disp.x = 6 * self.scale * (len(self.all_text.text) - 1)
         self.cursor_text.anchored_position = (self.cursor_disp.x, 32)
         # buzzer
         buzzer.beep(freq=self.freq)
         self.freq = 0
-        return 
+        return
 
     def receive(self, message, memo):
         self.freq = 1200
         print('Entered the Master Key app')
+        # init key when entering
         self.key = '0'
         return
 
@@ -307,11 +316,11 @@ class Menu(Application):
         # buzzer
         self.freq = 0
         self.tictoc = True
-        
+
         # display
         self.screen_N = min(len(self.items), 4)
         self.splash = displayio.Group()
-        
+
         # note text
         self.note_text = label.Label(
             FONT,
@@ -321,30 +330,30 @@ class Menu(Application):
             color=0xFFFFFF,
         )
         self.splash.append(self.note_text)
-        
+
         # draw a square (cursor)
         self.cursor_bitmap = displayio.Bitmap(126, 16, 1)
         color_palette = displayio.Palette(1)
         color_palette[0] = 0xFFFFFF  # White
         self.cursor_disp = displayio.TileGrid(
-            self.cursor_bitmap, 
+            self.cursor_bitmap,
             pixel_shader=color_palette,
             x=0, y=0,
         )
         self.splash.append(self.cursor_disp)
-        
+
         # draw a square (scroll)
         self.scroll_size = max(20, 64 // len(self.items))
         self.scroll_bitmap = displayio.Bitmap(1, self.scroll_size, 1)
         scroll_palette = displayio.Palette(1)
         scroll_palette[0] = 0xFFFFFF  # White
         self.scroll_disp = displayio.TileGrid(
-            self.scroll_bitmap, 
+            self.scroll_bitmap,
             pixel_shader=color_palette,
             x=127, y=0,
         )
         self.splash.append(self.scroll_disp)
-                
+
         # name text
         self.name_text = label.Label(
             FONT,
@@ -358,13 +367,12 @@ class Menu(Application):
         # states
         self.ind = 0
         self.ind_screen = 0
-        
+
     def update(self, ring_get):
-        # buzzer
+        # buzzer when press or slide
         if ring_get['buttons']['center'] == 1 \
             or ring_get['buttons']['ring'] == 1 \
             or ring_get['dial']:
-            # if press or slide
             self.freq = 1000
         # logic
         self.ind += ring_get['dial']
@@ -372,16 +380,16 @@ class Menu(Application):
             self.ind_screen = self.ind - (self.screen_N - 1)
         if self.ind < self.ind_screen:
             self.ind_screen = self.ind
-            
+
         return 0, {}, {}
-        
+
     def mod(self, ind):
         while ind >= len(self.items):
             ind -= len(self.items)
         while ind < 0:
             ind += len(self.items)
         return ind
-        
+
     def display(self, display, buzzer):
         # OLED
         display.show(self.splash)
@@ -413,7 +421,7 @@ class Menu(Application):
             buzzer.beep(freq=0)
         self.tictoc = not self.tictoc
 
-        return 
+        return
 
     def receive(self, message, memo):
         print('Entered a Menu app')
@@ -421,29 +429,28 @@ class Menu(Application):
 
 class MainMenu(Menu):
     def __init__(self, items):
-        # call super
         super().__init__(items)
-    
+
     def update(self, ring_get):
         super().update(ring_get)
-            
+
         # if enter
         if ring_get['buttons']['center'] == -1:
-            return 1, self.mod(self.ind), {}
-            
+            return self.mod(self.ind) + 1, {}, {}
+
         return 0, {}, {}
 
     def receive(self, message, memo):
         super().receive(message, memo)
         print("Entered the Main Menu app")
         self.freq = 1200
-    
+
 class AccountList(Menu):
     def __init__(self):
         # data
         file = open('items.csv', 'r')
         self.title = [
-            sec.strip() 
+            sec.strip()
             for sec in file.readline().strip().split(',')
         ]
         self.data = []
@@ -464,25 +471,25 @@ class AccountList(Menu):
             self.data,
             key=lambda x: x['website']
         )
-        
+
         # call super
         super().__init__([self.data[i]['website'] for i in range(len(self.data))])
-    
+
     def update(self, ring_get):
         super().update(ring_get)
-            
+
         # if enter
         if ring_get['buttons']['center'] == -1:
             return 1, {
                 'data': self.data[self.mod(self.ind)]
             }, {}
-            
+
         # if back
         if ring_get['buttons']['up'] == -1:
             return -1, {}, {}
-            
+
         return 0, {}, {}
-        
+
     def receive(self, message, memo):
         super().receive(message, memo)
         print("Entered the Account list")
@@ -509,24 +516,24 @@ def vigenere(plain, key, dir=1):
     return out
 
 class Item(Application):
-    def __init__(self):
+    def __init__(self, keyboard):
         # data
         self.data = {}
-        
+
         # display
         self.splash = displayio.Group()
-        
+
         # draw a square (cursor)
         self.cursor_bitmap = displayio.Bitmap(128, 16, 1)
         color_palette = displayio.Palette(1)
         color_palette[0] = 0xFFFFFF  # White
         self.cursor_disp = displayio.TileGrid(
-            self.cursor_bitmap, 
+            self.cursor_bitmap,
             pixel_shader=color_palette,
             x=0, y=0,
         )
         self.splash.append(self.cursor_disp)
-                
+
         # name text
         self.name_text = label.Label(
             FONT,
@@ -536,7 +543,7 @@ class Item(Application):
             color=0x000000,
         )
         self.splash.append(self.name_text)
-        
+
         # note text
         self.note_text = label.Label(
             FONT,
@@ -546,12 +553,12 @@ class Item(Application):
             color=0xFFFFFF,
         )
         self.splash.append(self.note_text)
-        
+
         # keyboard
-        self.keyboard = Keyboard(usb_hid.devices)
+        self.keyboard = keyboard
         self.keyboard_layout = KeyboardLayoutUS(self.keyboard)
         self.key = 'key'
-        
+
     def update(self, ring_get):
         # buzzer
         if ring_get['buttons']['center'] == 1 \
@@ -584,7 +591,7 @@ class Item(Application):
         # buzzer
         buzzer.beep(freq=self.freq)
         self.freq = 0
-        return 
+        return
 
     def receive(self, message, memo):
         print("Entered the Item app")
@@ -596,14 +603,14 @@ class Item(Application):
 class ClickWheelTest(Application):
     def __init__(self):
         self.splash = displayio.Group()
-        
+
         # count text
         text = "0" # free ram
         self.text_area = label.Label(
             FONT, text=text, color=0xFFFFFF, x=0, y=3
         )
         self.splash.append(self.text_area)
-        
+
         # button text
         button_text = "0" # free ram
         self.button_text_area = label.Label(
@@ -614,14 +621,14 @@ class ClickWheelTest(Application):
             x=0, y=58,
         )
         self.splash.append(self.button_text_area)
-        
+
         # text display timer
         self.timer = Timer()
-        
+
         # output contents
         self.n = 0
         self.info = ''
-        
+
     def update(self, ring_get):
         # main logic
         self.n += ring_get['dial']
@@ -648,21 +655,21 @@ class ClickWheelTest(Application):
             self.info = 'center hold'
         else:
             button_released = False
-            
+
         # delayed display content
         if button_released:
             self.timer.start(2)
         if self.timer.over():
             self.info = ''
-            
+
         # Normal return
         return 0, {}, {}
-            
+
     def display(self, display, buzzer):
         # OLED
         display.show(self.splash)
         self.text_area.text = str(self.n)
         self.button_text_area.text = self.info
-            
+
     def receive(self, message, memo):
         self.n = message['count']

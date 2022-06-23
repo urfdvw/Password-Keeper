@@ -1,16 +1,25 @@
 """
-This code test a bounce ball animation on the display.
-It shows that the average frame rate is around 22.4. keep in mind.
-as more pixels are refreshed, this is getting slower
+This script is the entry point of all scripts.
+Please check the .url files for more help
+
+Github: https://github.com/urfdvw/Password-Keeper/
+
+Platform: Password Keeper
+CircuitPython: 7
+
+Author: River Wang
+Contact: urfdvw@gmail.com
+License: GPL3
+Date updated: 2022/06/21 (YYYY/MM/DD)
 """
 import board
 
 #%% buzzer
-from buzzer import Buzzer
+from driver import Buzzer
 buzzer = Buzzer(board.GP0)
 
 #%% clickwheel
-from clickwheel import Ring, Button
+from driver import Ring, Button
 center = Button(board.GP9)
 ring = Ring(
     [
@@ -23,12 +32,15 @@ ring = Ring(
 )
 
 #%% find the range of raw_value for ring pad.
+# run this code if you are testing a new PCB design
 if False:
     from time import monotonic, sleep
     tic = monotonic()
     ring_max = [0] * 4
     ring_min = [100000] * 4
     while monotonic() - tic < 5:
+        # run the test for 5s
+        # in the mean time, slide on the ring for multiple cycles.
         for i in range(4):
             value = ring.ring[i].raw_value
             ring_max[i] = max(ring_max[i], value)
@@ -54,17 +66,31 @@ i2c = busio.I2C(board.GP17, board.GP16, frequency=int(1e6))
 display_bus = displayio.I2CDisplay(i2c, device_address=0x3C, reset=oled_reset)
 WIDTH = 128
 HEIGHT = 64
-ROTATION = 0 # or 180
-FPS_SET = 30
-display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=ROTATION)
+display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=0)
+
+#%% USB HID
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.mouse import Mouse
+
+while True:
+    try:
+        # Keep trying connect to USB untill success
+        # This useful for computer log in after boot.
+        mouse = Mouse(usb_hid.devices)
+        keyboard = Keyboard(usb_hid.devices)
+        break
+    except:
+        print('\n' * 10 + 'USB not ready\nPlease Wait')
 
 #%% Background apps
 from background import FpsControl, FpsMonitor, NumLocker, MouseJitter
-        
+
 frame_app = FpsControl(fps=30)
-fpsMonitor_app = FpsMonitor(period=1, fps_app=frame_app)
-num_app = NumLocker()
-mouse_app = MouseJitter(period=60)
+fpsMonitor_app = FpsMonitor(period=10, fps_app=frame_app)
+num_app = NumLocker(keyboard=keyboard)
+mouse_app = MouseJitter(mouse=mouse, period=60)
+
 #%% apps
 from application import BounceBall, MainMenu, Password, AccountList, Item, ClickWheelTest
 app_ball = BounceBall()
@@ -74,35 +100,33 @@ app_menu = MainMenu([
 ])
 app_pass = Password()
 app_accounts = AccountList()
-app_item = Item()
+app_item = Item(keyboard)
 app_test = ClickWheelTest()
 
-app = app_pass
+app = app_pass # app to start from
 
 #%% Main logic
 print('init done')
 memo = {}
 while True:
     # Background procedures
-    fpsMonitor_app()  # monitor fps
+    fpsMonitor_app()
     mouse_app()
-    # num_app()  # For Windows Only
-
+    num_app()  # For Windows Only
 
     # FPS control
     if not frame_app():
         continue
-    
+
     # logic
     shift, message, broadcast = app.update(ring.get())
     memo.update(broadcast)
     if shift:
         if id(app) == id(app_menu):
             if shift == 1:
-                if message == 0:
-                    app = app_pass
-                if message == 1:
-                    app = app_ball
+                app = app_pass
+            elif shift == 2:
+                app = app_ball
         elif id(app) == id(app_pass):
             if shift == -1:
                 app = app_menu
