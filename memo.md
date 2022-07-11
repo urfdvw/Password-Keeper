@@ -26,6 +26,14 @@ Time-related tools are defined in timetrigger.py
 Apps with UI are in Aplication.py
 Background processes are in backgrounf.py
 
+# code.py structure
+- hardware and then software object instanciation and initialization should be here
+    - class definitions should be in other modules
+    - out put first and input after
+        - this is for displaying debug info when not using USB
+            - Should try BLE work flow later
+- while true main loop at the end for managing the life cycle of the apps.
+
 # Sound
 - all sounds are just a brief beep (one frame) unless special usage
     - tic-toc is used to avoid continuous sound
