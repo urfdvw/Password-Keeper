@@ -10,7 +10,7 @@ CircuitPython: 7
 Author: River Wang
 Contact: urfdvw@gmail.com
 License: GPL3
-Date updated: 2022/06/28 (YYYY/MM/DD)
+Date updated: 2022/07/11 (YYYY/MM/DD)
 """
 import board
 
@@ -21,6 +21,19 @@ buzzer = Buzzer(board.TX)
 fake_gnd = DigitalInOut(board.D2)
 fake_gnd.direction = Direction.OUTPUT
 fake_gnd = False
+
+#%% define screen
+import busio
+import displayio
+import adafruit_displayio_ssd1306
+
+displayio.release_displays()
+oled_reset = None
+i2c = busio.I2C(board.SCL, board.SDA, frequency=int(1e6))
+display_bus = displayio.I2CDisplay(i2c, device_address=0x3C, reset=oled_reset)
+WIDTH = 128
+HEIGHT = 64
+display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=0)
 
 #%% clickwheel
 from driver import Ring, Button
@@ -52,25 +65,13 @@ if False:
             # print(ring_max, ring_min)
             sleep(0.1)
     print(ring_max, ',', ring_min)
-    # cancel running the original script
-    import sys
-    sys.exit()
+    # keep displaying the result on OLED
+    sleep(float('inf'))
 
 #%% use pre measured max and min
-ring.max, ring.min = [599, 495, 526, 676] , [189, 189, 220, 200]
+# ring.max, ring.min = [301, 344, 289, 320] , [173, 165, 188, 182]  # Battery value
+ring.max, ring.min = [599, 495, 526, 676] , [189, 189, 220, 200]  # USB value
 
-#%% define screen
-import busio
-import displayio
-import adafruit_displayio_ssd1306
-
-displayio.release_displays()
-oled_reset = None
-i2c = busio.I2C(board.SCL, board.SDA, frequency=int(1e6))
-display_bus = displayio.I2CDisplay(i2c, device_address=0x3C, reset=oled_reset)
-WIDTH = 128
-HEIGHT = 64
-display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=WIDTH, height=HEIGHT, rotation=0)
 
 #%% USB HID
 import usb_hid
