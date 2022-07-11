@@ -29,10 +29,13 @@ class Buzzer:
 
 #%% clickwheel
 import touchio
-from math import sqrt, atan2, pi
+from math import sqrt, atan2, pi, exp
 import time
 from timetrigger import Timer
 
+# soft dead zone
+def curve(x):
+    return (1 / (exp(-x) +1) - 0.5) * 2 * abs(x) * 2.5 + 0.5 * x
 
 def theta_diff(a, b):
     c = a - b
@@ -177,7 +180,7 @@ class Ring:
             self.dial_changed = False
         elif self.touch and self.touch_last: # ring hold
             buttons['ring'] = 2
-            self.theta_d = theta_diff(self.theta, self.theta_last)
+            self.theta_d = curve(theta_diff(self.theta, self.theta_last))
             self.theta_residual += self.theta_d
             while self.theta_residual > pi / self.dial_N:
                 self.theta_residual -= 2 * pi / self.dial_N
