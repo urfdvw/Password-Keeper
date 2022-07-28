@@ -72,21 +72,54 @@ if False:
 # ring.max, ring.min = [301, 344, 289, 320] , [173, 165, 188, 182]  # Battery value
 ring.max, ring.min = [599, 495, 526, 676] , [189, 189, 220, 200]  # USB value
 
-
-#%% USB HID
-import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.mouse import Mouse
+if ring.get()['buttons']['down']:
+    # hold down to force connect USB Hid
+    print('using usb hid')
+    # USB HID libs
+    import usb_hid
+    while True:
+        try:
+            # Keep trying connect to USB untill success
+            # This useful for computer log in after boot.
+            mouse = Mouse(usb_hid.devices)
+            keyboard = Keyboard(usb_hid.devices)
+            break
+        except:
+            print('\n' * 10 + 'USB not ready\nPlease Wait')
+else:
+    print('using ble hid')
+    ring.max, ring.min = [301, 344, 289, 320] , [173, 165, 188, 182]  # Battery value
+    # BLE libs
+    import adafruit_ble
+    from adafruit_ble.advertising import Advertisement
+    from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
+    from adafruit_ble.services.standard.hid import HIDService
+    from adafruit_ble.services.standard.device_info import DeviceInfoService
+    from time import sleep
+    ble_hid = HIDService()
+    device_info = DeviceInfoService(
+        software_revision=adafruit_ble.__version__,
+        manufacturer="Adafruit Industries"
+        )
+    advertisement = ProvideServicesAdvertisement(ble_hid)
+    advertisement.appearance = 960
+    scan_response = Advertisement()
+    scan_response.complete_name = "CircuitPython HID"
 
-while True:
-    try:
-        # Keep trying connect to USB untill success
-        # This useful for computer log in after boot.
-        mouse = Mouse(usb_hid.devices)
-        keyboard = Keyboard(usb_hid.devices)
-        break
-    except:
-        print('\n' * 10 + 'USB not ready\nPlease Wait')
+    ble = adafruit_ble.BLERadio()
+    if not ble.connected:
+        print("\n" * 4 + "advertising")
+        ble.start_advertising(advertisement, scan_response)
+        sleep(0.5)
+
+    mouse = Mouse(ble_hid.devices)
+    keyboard = Keyboard(ble_hid.devices)
+    
+    while not ble.connected:
+        pass
+    
 
 #%% Background apps
 from background import FpsControl, FpsMonitor, NumLocker, MouseJitter
@@ -117,7 +150,7 @@ while True:
     # Background procedures
     fpsMonitor_app()
     mouse_app()
-    num_app()  # For Windows Only
+    # num_app()  # For Windows Only # not working in BLE mode
 
     # FPS control
     if not frame_app():
