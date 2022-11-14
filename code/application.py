@@ -5,12 +5,14 @@ Applications with UI
 # Python
 import random
 from math import pi
+
 # CircuitPython
 import displayio
 from terminalio import FONT
 # Adafruit
 from adafruit_display_text import label, wrap_text_to_lines
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+from adafruit_hid.keycode import Keycode
 
 # Keeper
 from timetrigger import Timer
@@ -558,6 +560,9 @@ class Item(Application):
         self.keyboard = keyboard
         self.keyboard_layout = KeyboardLayoutUS(self.keyboard)
         self.key = 'key'
+        
+        # state
+        self.after_name = False
 
     def update(self, ring_get):
         # buzzer
@@ -577,6 +582,12 @@ class Item(Application):
                 self.key))
         if ring_get['buttons']['right'] == -1:
             self.keyboard_layout.write(self.data['link'])
+        if ring_get['buttons']['center'] == -1:
+            if self.after_name:
+                self.keyboard.send(Keycode.ENTER)
+            else:
+                self.keyboard.send(Keycode.TAB)
+                self.after_name = True
         return 0, {}, {}
 
     def display(self, display, buzzer):
@@ -595,6 +606,7 @@ class Item(Application):
 
     def receive(self, message, memo):
         print("Entered the Item app")
+        self.after_name = False
         self.freq = 1200
         self.data = message['data']
         self.key = memo['key']

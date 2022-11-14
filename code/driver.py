@@ -29,13 +29,43 @@ class Buzzer:
 
 #%% clickwheel
 import touchio
-from math import sqrt, atan2, pi, exp
+from math import sqrt, atan2, pi, exp, sin
 import time
 from timetrigger import Timer
 
-# soft dead zone
-def curve(x):
-    return (1 / (exp(-x) +1) - 0.5) * 2 * abs(x) * 2.5 + 0.5 * x
+# Relay to filter out shakes
+class ThetaFilter:
+    def __init__(self):
+        self.thr = pi / 30
+        self.remain = 0
+    # on theta
+    def __call__(self, x):
+        # return (1 / (exp(-x) +1) - 0.5) * 2 * abs(x) * 2.5 + 0.5 * x
+        self.remain += x
+        if self.remain > self.thr:
+            y = self.remain - self.thr
+        elif self.remain < -self.thr:
+            y = self.remain + self.thr
+        else:
+            self.remain *= 0.95
+            y = 0
+        self.remain = self.remain - y
+        return y
+theta_filter = ThetaFilter()
+
+# # uncomment and ctrl enter for plot and testing
+# print('startplot:', 'y1', 'y2')
+# y1 = 0
+# y2 = 0
+# for i in range(0, 70):
+#     t = i / 100
+#     x = sin(t * 10)
+#     y1 += x
+#     y2 += theta_filter(x)
+#     print(y1, y2)
+
+#%%
+            
 
 def theta_diff(a, b):
     c = a - b
@@ -180,7 +210,7 @@ class Ring:
             self.dial_changed = False
         elif self.touch and self.touch_last: # ring hold
             buttons['ring'] = 2
-            self.theta_d = curve(theta_diff(self.theta, self.theta_last))
+            self.theta_d = theta_filter(theta_diff(self.theta, self.theta_last))
             self.theta_residual += self.theta_d
             while self.theta_residual > pi / self.dial_N:
                 self.theta_residual -= 2 * pi / self.dial_N
