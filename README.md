@@ -100,5 +100,6 @@ Software extension suggestion
 Hardware extension suggestions
 - You can use the touch ring on any of your own DIY projects
     - The [driver code](./code/driver.py) can be used directly
+    - Check out the [Python Script](https://colab.research.google.com/github/urfdvw/Password-Keeper/blob/main/wheel%20design/draw%20wheel%20svg.ipynb) that generates the wheel pattern that can be imported to your PCB design.
 ---
 # Happy Coding
